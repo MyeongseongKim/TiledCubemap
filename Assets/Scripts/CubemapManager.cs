@@ -29,9 +29,14 @@ public class CubemapManager : MonoBehaviour
         // await _highResCubemap.LoadCubemapAtOnceAsync(_path, () => {
         //     Debug.Log("High-res cubemap is Loaded!");
         // });
-        await _highResCubemap.LoadCubemapByPriorityAsync(_path, Camera.main, () => {
-            Debug.Log("High-res cubemap is Loaded!");
-        });
+        // await _highResCubemap.LoadCubemapByPriorityAsync(_path, Camera.main, () => {
+        //     Debug.Log("High-res cubemap is Loaded!");
+        // });
+        _highResCubemap.LoadingCoroutine = StartCoroutine(
+            _highResCubemap.LoadCubemapInPeripheralAsync(_path, Camera.main, () => {
+                Debug.Log("High-res cubemap is Loaded!");
+            })
+        );
     }
 
 

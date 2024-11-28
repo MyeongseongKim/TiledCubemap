@@ -3,6 +3,7 @@ using UnityEngine.Networking;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,9 +28,18 @@ public class TiledCubemap
     {
         get { return _tileObjects;}
     }
+    private Coroutine _loadingCoroutine;
+    public Coroutine LoadingCoroutine 
+    {
+        get { return _loadingCoroutine; }
+        set { _loadingCoroutine = value; }
+    }
     private CancellationTokenSource _cts;
 
     private readonly Shader CUBEMAP_SHADER = Shader.Find("Custom/CubemapShader");
+
+    private static readonly float PERIPHERAL_FOV = Mathf.Deg2Rad * 120f;
+    private const int MAX_TASK_COUNT = 8;
 
 
     public TiledCubemap(Resolution res, float size, int queueOffset = 0) 
@@ -97,6 +107,47 @@ public class TiledCubemap
         _cts.Cancel();
     }
 
+    public IEnumerator LoadCubemapInPeripheralAsync(string path, Camera camera, Action onCubemapLoaded) 
+    {
+        _cts = new CancellationTokenSource();
+
+        List<GameObject> unloadedTiles = _tileObjects.ToList();
+        while (unloadedTiles.Count > 0) 
+        {
+            SortTiles(unloadedTiles, camera);
+            List<GameObject> tilesToLoad = new List<GameObject>();
+            
+            int length = MAX_TASK_COUNT;
+            if (unloadedTiles.Count < MAX_TASK_COUNT) 
+            {
+                length = unloadedTiles.Count;
+            }
+
+            for (int i = 0; i < length; i++) 
+            {
+                var tile = unloadedTiles[i];
+                if (GetTileWeight(tile, camera) > Mathf.Cos(PERIPHERAL_FOV * 0.5f)) 
+                {
+                    tilesToLoad.Add(unloadedTiles[i]);
+                }
+            }
+
+            bool isLoaded = false;
+            LoadTilesAsync(tilesToLoad, path, () => {
+                isLoaded = true;
+            });
+            while (!isLoaded)
+            {
+                yield return null;
+            }
+
+            unloadedTiles = unloadedTiles.Except(tilesToLoad).ToList();
+
+            yield return null;
+        }
+
+        onCubemapLoaded?.Invoke();
+    }
 
     public async Task LoadCubemapByPriorityAsync(string path, Camera camera, Action onCubemapLoaded) 
     {
@@ -196,6 +247,18 @@ public class TiledCubemap
     }
 
 
+    private void SortTiles(List<GameObject> tiles, Camera camera) 
+    {
+        tiles.Sort((tileA, tileB) =>
+        {
+            float weightA = GetTileWeight(tileA, camera);
+            float weightB = GetTileWeight(tileB, camera);
+
+            return weightB.CompareTo(weightA);
+        });
+    }
+
+
     private int GetTileIndexToLoad(Camera camera) 
     {
         Vector3 look = camera.transform.forward;
@@ -217,5 +280,13 @@ public class TiledCubemap
             }
         }
         return index;
+    }
+
+    private float GetTileWeight(GameObject tile, Camera camera) 
+    {
+        Vector3 look = camera.transform.forward;
+        Vector3 pseudoNormal = (tile.transform.position - camera.transform.position).normalized;
+        float weight = Vector3.Dot(look, pseudoNormal);
+        return weight;
     }
 }
