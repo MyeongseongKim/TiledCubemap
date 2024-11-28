@@ -22,6 +22,27 @@ public class CubemapManager : MonoBehaviour
         _lowResCubemap.CubemapObject.name = "Cubemap2K";
         _highResCubemap = new TiledCubemap(TiledCubemap.DivisionType.Matrix4x4, SIZE);
         _highResCubemap.CubemapObject.name = "Cubemap8K";
+
+        _lowResCubemap.LoadingCoroutine = StartCoroutine(
+            _lowResCubemap.LoadCubemapAtOnceAsync(_path, () => {
+                Debug.Log("Low-res cubemap is Loaded!");
+            })
+        );
+        // _highResCubemap.LoadingCoroutine = StartCoroutine(
+        //     _highResCubemap.LoadCubemapAtOnceAsync(_path, () => {
+        //         Debug.Log("High-res cubemap is Loaded!");
+        //     })
+        // );
+        // _highResCubemap.LoadingCoroutine = StartCoroutine(
+        //     _highResCubemap.LoadCubemapByPriorityAsync(_path, Camera.main, () => {
+        //         Debug.Log("High-res cubemap is Loaded!");
+        //     })
+        // );
+        _highResCubemap.LoadingCoroutine = StartCoroutine(
+            _highResCubemap.LoadCubemapInPeripheralAsync(_path, Camera.main, () => {
+                Debug.Log("High-res cubemap is Loaded!");
+            })
+        );
     }
 
 
