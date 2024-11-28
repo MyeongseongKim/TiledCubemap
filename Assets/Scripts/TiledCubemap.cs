@@ -1,5 +1,8 @@
 using UnityEngine;
+using UnityEngine.Networking;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 
 public class TiledCubemap
@@ -22,6 +25,7 @@ public class TiledCubemap
     {
         get { return _tileObjects;}
     }
+    private CancellationTokenSource _cts;
 
     private readonly Shader CUBEMAP_SHADER = Shader.Find("Unlit/TransparentTexture");
 
@@ -77,6 +81,42 @@ public class TiledCubemap
                 
                     _tileObjects[index] = tile;
                 }
+            }
+        }
+    }
+
+
+    public void CancelLoading() 
+    {
+        _cts.Cancel();
+    }
+
+
+    private async Task LoadTextureAsync(string url, Action<Texture2D> onTextureLoaded, Action onError)
+    {
+        using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(url))
+        {
+            var response = request.SendWebRequest();
+            while (!response.isDone)
+            {
+                if (_cts.Token.IsCancellationRequested)
+                {
+                    Debug.LogWarning("Texture loading is cancelled");
+                    return;
+                }
+                await Task.Yield();
+            }
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogWarning($"Failed request from {url}: {request.error}");
+                onError?.Invoke();
+            }
+            else
+            {
+                Texture2D texture = DownloadHandlerTexture.GetContent(request);
+                texture.wrapMode = TextureWrapMode.Clamp;
+                onTextureLoaded?.Invoke(texture);
             }
         }
     }
