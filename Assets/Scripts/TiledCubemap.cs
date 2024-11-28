@@ -49,6 +49,7 @@ public class TiledCubemap
                     int index = face * division * division + i * division + j;
 
                     var tile = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                    tile.SetActive(false);
                     tile.GetComponent<MeshRenderer>().material = new Material(CUBEMAP_SHADER);
                     tile.transform.parent = _cubemapObject.transform;
                     tile.name = $"{face}_{res}_{i}_{j}";
