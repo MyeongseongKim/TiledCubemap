@@ -13,7 +13,7 @@ public class CubemapManager : MonoBehaviour
     private const float SIZE = 100f;
 
 
-    void Start()
+    async void Start()
     {
         _path = _remoteDir + _envName;
         Debug.Log(_path);
@@ -22,6 +22,13 @@ public class CubemapManager : MonoBehaviour
         _lowResCubemap.CubemapObject.name = "Cubemap2K";
         _highResCubemap = new TiledCubemap(TiledCubemap.Resolution.High, SIZE);
         _highResCubemap.CubemapObject.name = "Cubemap8K";
+
+        await _lowResCubemap.LoadCubemapAtOnceAsync(_path, () => {
+            Debug.Log("Low-res cubemap is Loaded!");
+        });
+        await _highResCubemap.LoadCubemapAtOnceAsync(_path, () => {
+            Debug.Log("High-res cubemap is Loaded!");
+        });
     }
 
 

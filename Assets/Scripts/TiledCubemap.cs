@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.Networking;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -93,6 +95,37 @@ public class TiledCubemap
     public void CancelLoading() 
     {
         _cts.Cancel();
+    }
+
+
+    public async Task LoadCubemapAtOnceAsync(string path, Action onCubemapLoaded)
+    {
+        _cts = new CancellationTokenSource();
+
+        List<Task> loadTasks = new List<Task>();
+        foreach (var tile in _tileObjects)
+        {
+            if (_cts.Token.IsCancellationRequested)
+            {
+                Debug.LogWarning("Cubemap loading is cancelled");
+                return;
+            }
+
+            string url = $"{path}_{tile.name}.jpg";
+            loadTasks.Add(LoadTextureAsync(
+                url, 
+                texture => {
+                    tile.GetComponent<MeshRenderer>().material.mainTexture = texture;
+                    tile.SetActive(true);
+                },
+                () => {
+                    Debug.LogWarning($"Failed to load tile {tile.name} of {_cubemapObject.name}");    
+                }
+            ));
+        }
+        await Task.WhenAll(loadTasks);
+
+        onCubemapLoaded?.Invoke();
     }
 
 
