@@ -13064,6 +13064,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b347ca4088f108548a45242f28a56832, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _remoteDir: https://raw.githubusercontent.com/MyeongseongKim/ProgressiveCubemap/refs/heads/main/Assets/Images/
+  _envName: IMG_20240424_131026_00_083
 --- !u!1 &1425705058
 GameObject:
   m_ObjectHideFlags: 0
