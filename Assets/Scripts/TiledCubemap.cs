@@ -48,6 +48,7 @@ public class TiledCubemap
         int res = division * TILE_RESOLUTION;
 
         _cubemapObject = new GameObject();
+        _cubemapObject.SetActive(false);
         _cubemapObject.transform.localScale = size * Vector3.one;
 
         _tileObjects = new GameObject[6 * division * division];
@@ -103,6 +104,16 @@ public class TiledCubemap
     }
 
 
+    public void Clear()
+    {
+        foreach (var tile in _tileObjects) 
+        {
+            tile.SetActive(false);
+            tile.GetComponent<Renderer>().material.mainTexture = null;
+        }
+        _cubemapObject.SetActive(false);
+    }
+
     public void CancelLoading() 
     {
         _cts.Cancel();
@@ -110,6 +121,7 @@ public class TiledCubemap
 
     public IEnumerator LoadCubemapInPeripheralAsync(string path, Camera camera, Action onComplete) 
     {
+        _cubemapObject.SetActive(true);
         _cts = new CancellationTokenSource();
 
         List<GameObject> unloadedTiles = _tileObjects.ToList();
@@ -157,6 +169,7 @@ public class TiledCubemap
 
     public IEnumerator LoadCubemapByPriorityAsync(string path, Camera camera, Action onComplete) 
     {
+        _cubemapObject.SetActive(true);
         _cts = new CancellationTokenSource();
 
         List<GameObject> unloadedTiles = _tileObjects.ToList();
@@ -186,6 +199,7 @@ public class TiledCubemap
 
     public IEnumerator LoadCubemapAtOnceAsync(string path, Action onComplete) 
     {
+        _cubemapObject.SetActive(true);
         _cts = new CancellationTokenSource();
         
         Task loadingTask = LoadTilesAsync(_tileObjects, path);
