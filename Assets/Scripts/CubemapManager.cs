@@ -18,7 +18,7 @@ public class CubemapManager : MonoBehaviour
         _path = _remoteDir + _envName;
         Debug.Log(_path);
 
-        _lowResCubemap = new TiledCubemap(TiledCubemap.Resolution.Low, SIZE);
+        _lowResCubemap = new TiledCubemap(TiledCubemap.Resolution.Low, SIZE + 0.01f, -1);
         _lowResCubemap.CubemapObject.name = "Cubemap2K";
         _highResCubemap = new TiledCubemap(TiledCubemap.Resolution.High, SIZE);
         _highResCubemap.CubemapObject.name = "Cubemap8K";

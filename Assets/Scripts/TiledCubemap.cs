@@ -30,7 +30,7 @@ public class TiledCubemap
     private readonly Shader CUBEMAP_SHADER = Shader.Find("Custom/CubemapShader");
 
 
-    public TiledCubemap(Resolution res, float size) 
+    public TiledCubemap(Resolution res, float size, int queueOffset = 0) 
     {
         int division = (int) res / TILE_RESOLUTION;
 
@@ -49,7 +49,11 @@ public class TiledCubemap
 
                     var tile = GameObject.CreatePrimitive(PrimitiveType.Quad);
                     tile.SetActive(false);
-                    tile.GetComponent<MeshRenderer>().material = new Material(CUBEMAP_SHADER);
+
+                    var renderer = tile.GetComponent<MeshRenderer>();
+                    renderer.material = new Material(CUBEMAP_SHADER);
+                    renderer.material.renderQueue += queueOffset;
+                    
                     tile.transform.parent = _cubemapObject.transform;
                     tile.name = $"{face}_{(int) res}_{i}_{j}";
 
