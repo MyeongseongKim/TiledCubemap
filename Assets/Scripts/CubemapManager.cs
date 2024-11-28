@@ -26,7 +26,10 @@ public class CubemapManager : MonoBehaviour
         await _lowResCubemap.LoadCubemapAtOnceAsync(_path, () => {
             Debug.Log("Low-res cubemap is Loaded!");
         });
-        await _highResCubemap.LoadCubemapAtOnceAsync(_path, () => {
+        // await _highResCubemap.LoadCubemapAtOnceAsync(_path, () => {
+        //     Debug.Log("High-res cubemap is Loaded!");
+        // });
+        await _highResCubemap.LoadCubemapByPriorityAsync(_path, Camera.main, () => {
             Debug.Log("High-res cubemap is Loaded!");
         });
     }

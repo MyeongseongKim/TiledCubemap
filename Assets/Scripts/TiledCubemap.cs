@@ -98,6 +98,37 @@ public class TiledCubemap
     }
 
 
+    public async Task LoadCubemapByPriorityAsync(string path, Camera camera, Action onCubemapLoaded) 
+    {
+        _cts = new CancellationTokenSource();
+
+        while (GetTileIndexToLoad(camera) != -1)
+        {
+            if (_cts.Token.IsCancellationRequested)
+            {
+                Debug.LogWarning("Cubemap loading is cancelled");
+                return;
+            }
+
+            int index = GetTileIndexToLoad(camera);
+            var tile = _tileObjects[index];
+            string url = $"{path}_{tile.name}.jpg";
+
+            await LoadTextureAsync(
+                url, 
+                texture => {
+                    tile.GetComponent<MeshRenderer>().material.mainTexture = texture;
+                    tile.SetActive(true);
+                },
+                () => {
+                    Debug.LogWarning($"Failed to load tile {tile.name} of {_cubemapObject.name}");    
+                }
+            );
+        }
+
+        onCubemapLoaded?.Invoke();
+    }
+
     public async Task LoadCubemapAtOnceAsync(string path, Action onCubemapLoaded)
     {
         _cts = new CancellationTokenSource();
@@ -156,5 +187,29 @@ public class TiledCubemap
                 onTextureLoaded?.Invoke(texture);
             }
         }
+    }
+
+
+    private int GetTileIndexToLoad(Camera camera) 
+    {
+        Vector3 look = camera.transform.forward;
+
+        int index = -1;
+        float maxWeight = -1f;
+        for (int i = 0; i < _tileObjects.Length; i++) 
+        {
+            if (!_tileObjects[i].activeSelf) 
+            {
+                Vector3 pseudoNormal = (_tileObjects[i].transform.position - camera.transform.position).normalized;
+                float weight = Vector3.Dot(look, pseudoNormal);
+
+                if (index < 0 || weight > maxWeight) 
+                {
+                    index = i;
+                    maxWeight = weight;
+                }
+            }
+        }
+        return index;
     }
 }
