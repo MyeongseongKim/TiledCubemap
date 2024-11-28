@@ -133,8 +133,14 @@ public class TiledCubemap
     {
         _cts = new CancellationTokenSource();
 
+        await LoadTilesAsync(_tileObjects, path, onCubemapLoaded);
+    }
+
+
+    public async Task LoadTilesAsync(IEnumerable<GameObject> tiles, string path, Action onCubemapLoaded)
+    {
         List<Task> loadTasks = new List<Task>();
-        foreach (var tile in _tileObjects)
+        foreach (var tile in tiles)
         {
             if (_cts.Token.IsCancellationRequested)
             {
