@@ -50,7 +50,11 @@ public class TiledCubemap
 
                     var tile = GameObject.CreatePrimitive(PrimitiveType.Quad);
                     tile.SetActive(false);
-                    tile.GetComponent<MeshRenderer>().material = new Material(CUBEMAP_SHADER);
+
+                    var renderer = tile.GetComponent<MeshRenderer>();
+                    renderer.material = new Material(CUBEMAP_SHADER);
+                    renderer.material.renderQueue += queueOffset;
+                    
                     tile.transform.parent = _cubemapObject.transform;
                     tile.name = $"{face}_{res}_{i}_{j}";
 
