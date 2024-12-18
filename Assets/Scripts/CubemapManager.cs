@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using System;
 
 
@@ -25,6 +26,10 @@ public class CubemapManager : MonoBehaviour
 
         _lowResCubemap.LoadingCoroutine = StartCoroutine(
             _lowResCubemap.LoadCubemapAtOnceAsync(_path, () => {
+                for (int i = 0; i < _lowResCubemap.TileObjects.Length; i++) 
+                {
+                    _lowResCubemap.TileObjects[i].GetComponent<MeshRenderer>().material.SetColor("_Color", Color.grey);
+                }
                 Debug.Log("Low-res cubemap is Loaded!");
             })
         );
@@ -38,11 +43,11 @@ public class CubemapManager : MonoBehaviour
         //         Debug.Log("High-res cubemap is Loaded!");
         //     })
         // );
-        _highResCubemap.LoadingCoroutine = StartCoroutine(
-            _highResCubemap.LoadCubemapInPeripheralAsync(_path, Camera.main, () => {
-                Debug.Log("High-res cubemap is Loaded!");
-            })
-        );
+        // _highResCubemap.LoadingCoroutine = StartCoroutine(
+        //     _highResCubemap.LoadCubemapInPeripheralAsync(_path, Camera.main, () => {
+        //         Debug.Log("High-res cubemap is Loaded!");
+        //     })
+        // );
     }
 
 
@@ -50,4 +55,74 @@ public class CubemapManager : MonoBehaviour
     {
         
     }
+
+
+    public void LoadHighResCubemapAtOnce(InputAction.CallbackContext context)
+    {
+        if (!context.performed) {
+            return;   
+        }
+
+        if (_highResCubemap.CubemapObject.activeSelf)
+        {
+            return;
+        }
+        _highResCubemap.LoadingCoroutine = StartCoroutine(
+            _highResCubemap.LoadCubemapAtOnceAsync(_path, () => {
+                Debug.Log("High-res cubemap is Loaded!");
+            })
+        );
+    }
+
+    public void LoadHighResCubemapByPriority(InputAction.CallbackContext context) 
+    {
+        if (!context.performed) {
+            return;   
+        }
+
+        if (_highResCubemap.CubemapObject.activeSelf)
+        {
+            return;
+        }
+        _highResCubemap.LoadingCoroutine = StartCoroutine(
+            _highResCubemap.LoadCubemapByPriorityAsync(_path, Camera.main, () => {
+                Debug.Log("High-res cubemap is Loaded!");
+            })
+        );
+    }
+
+    public void LoadHighResCubemapInPeripheral(InputAction.CallbackContext context) 
+    {
+        if (!context.performed) {
+            return;   
+        }
+
+        if (_highResCubemap.CubemapObject.activeSelf)
+        {
+            return;
+        }
+        _highResCubemap.LoadingCoroutine = StartCoroutine(
+            _highResCubemap.LoadCubemapInPeripheralAsync(_path, Camera.main, () => {
+                Debug.Log("High-res cubemap is Loaded!");
+            })
+        );
+    }
+
+    public void ClearHighResCubemap(InputAction.CallbackContext context) 
+    {
+        if (!context.performed) {
+            return;   
+        }
+
+        if (!_highResCubemap.CubemapObject.activeSelf)
+        {
+            return;
+        }
+        _highResCubemap.CancelLoading();
+        if (_highResCubemap.LoadingCoroutine != null)
+            StopCoroutine(_highResCubemap.LoadingCoroutine);
+        _highResCubemap.Clear();
+        Debug.Log("High-res cubemap is deleted!");
+    }
+
 }
