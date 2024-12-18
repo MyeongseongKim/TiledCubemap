@@ -13065,7 +13065,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b347ca4088f108548a45242f28a56832, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _remoteDir: https://raw.githubusercontent.com/MyeongseongKim/ProgressiveCubemap/refs/heads/main/Assets/Images/
+  _remoteDir: https://widearth-web-dev.s3.ap-northeast-2.amazonaws.com/metaverse/dst/5/data_viewer/images_blurred/
   _envName: IMG_20240424_131026_00_083
 --- !u!114 &1425298811
 MonoBehaviour:
